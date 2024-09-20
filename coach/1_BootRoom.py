@@ -1,3 +1,6 @@
+# Copyright (c) [2024] DataRook, Inc. All rights reserved.
+# This source code is licensed under the license found in the
+# LICENSE.md file in the root directory of this source tree.
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd

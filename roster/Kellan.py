@@ -1,4 +1,6 @@
-# write code below!
+# Copyright (c) [2024] DataRook, Inc. All rights reserved.
+# This source code is licensed under the license found in the
+# LICENSE.md file in the root directory of this source tree.
 import streamlit as st
 import pandas as pd
 import altair as alt
