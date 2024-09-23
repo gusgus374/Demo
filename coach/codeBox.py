@@ -11,6 +11,100 @@ import numpy as np
 import altair as alt
 import os
 import pathlib
+from notion_client import Client
+import datetime
+
+# Initialize Notion client using secrets
+notion = Client(auth=st.secrets["notion_api_token"])
+
+# Function to find a page by student name
+def find_page_by_name(student_name):
+    query = notion.databases.query(
+        **{
+            "database_id": st.secrets["notion_database_id"],
+            "filter": {
+                "property": "Name",
+                "title": {
+                    "equals": student_name
+                }
+            }
+        }
+    )
+    results = query.get("results")
+    if results:
+        return results[0]["id"]
+    return None
+
+# Function to update an existing page with a new code block
+def update_page(page_id, code):
+    notion.blocks.children.append(
+        block_id=page_id,
+        children=[
+            {
+                "object": "block",
+                "type": "code",
+                "code": {
+                    "rich_text": [
+                        {
+                            "type": "text",
+                            "text": {
+                                "content": code
+                            }
+                        }
+                    ],
+                    "language": "python"
+                }
+            }
+        ]
+    )
+
+# Function to create a new page in the Notion database
+def create_page(student_name, code):
+    database_id = st.secrets["notion_database_id"]
+    notion.pages.create(
+        parent={"database_id": database_id},
+        properties={
+            "Name": {
+                "title": [
+                    {
+                        "text": {
+                            "content": student_name
+                        }
+                    }
+                ]
+            },
+            "Date": {
+                "date": {
+                    "start": datetime.datetime.now().isoformat()
+                }
+            }
+        },
+        children=[
+            {
+                "object": "block",
+                "type": "code",
+                "code": {
+                    "rich_text": [
+                        {
+                            "type": "text",
+                            "text": {
+                                "content": code
+                            }
+                        }
+                    ],
+                    "language": "python"
+                }
+            }
+        ]
+    )
+
+# Function to save code to Notion
+def save_code_to_notion(student_name, code):
+    page_id = find_page_by_name(student_name)
+    if page_id:
+        update_page(page_id, code)
+    else:
+        create_page(student_name, code)
 
 
 if 'code' not in st.session_state:
@@ -91,6 +185,12 @@ if st.session_state.code is not None:
 st.session_state.code = code
 st.session_state.old_code = st.session_state.code
         #st.write("*Remember to save your code separately!*")
+
+        # Save code to Notion when the save button is clicked
+if st.button("Save Code"):
+    student_name = st.session_state.user if st.session_state.user else "Unknown Student"
+    save_code_to_notion(student_name, code)
+    st.success("Code saved successfully!")
 
 with st.popover(f"{st.session_state.user}, SAVE YOUR WORK!"):
     file_name = st.text_input("Name your file",f"{st.session_state.user}")
