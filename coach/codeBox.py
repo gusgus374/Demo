@@ -186,22 +186,23 @@ st.session_state.code = code
 st.session_state.old_code = st.session_state.code
         #st.write("*Remember to save your code separately!*")
 
+with st.expander("Expand me to preview your app!",icon=":material/preview:",expanded=True):
+    app = st.container(border=False)
+    with app:
+        exec(st.session_state.code)
+
         # Save code to Notion when the save button is clicked
 if st.button("Save Code"):
     student_name = st.session_state.user if st.session_state.user else "Unknown Student"
     save_code_to_notion(student_name, code)
     st.success("Code saved successfully!")
 
-with st.popover(f"{st.session_state.user}, SAVE YOUR WORK!"):
-    file_name = st.text_input("Name your file",f"{st.session_state.user}")
-    btn = st.download_button(
-                    label="Download Python File",
-                    data = code,
-                    file_name=f"{file_name}.py"
-    )
+#with st.popover(f"{st.session_state.user}, SAVE YOUR WORK!"):
+#    file_name = st.text_input("Name your file",f"{st.session_state.user}")
+#    btn = st.download_button(
+#                    label="Download Python File",
+#                    data = code,
+#                    file_name=f"{file_name}.py"
+#    )
 
-with st.expander("Expand me to preview your app!",icon=":material/preview:",expanded=True):
-    app = st.container(border=False)
-    with app:
-        exec(st.session_state.code)
 
